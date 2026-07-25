@@ -1,17 +1,30 @@
-# Binaries
-helm
-helm.exe
-helm-linux
-*.exe
-*.exe.log
-*.dll
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
 *.so
-*.dylib
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+venv/
+.venv/
 
-# Test / Build artifacts
-*.test
-*.out
-*.prof
+# Environment variables
+.env
+.env.local
 
 # IDEs & OS
 .idea/

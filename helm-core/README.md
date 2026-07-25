@@ -5,7 +5,7 @@
 **Backend Control Plane for Homelab Infrastructure**
 
 [![CI & Snapshot Release](https://github.com/nayiswftw/Helm/actions/workflows/ci.yml/badge.svg)](https://github.com/nayiswftw/Helm/actions/workflows/ci.yml)
-[![Go Version](https://img.shields.io/badge/Go-1.22%2B-00ADD8?style=flat&logo=go)](https://go.dev)
+[![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue?style=flat&logo=python)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Debian%20%7C%20Linux-orange.svg)](https://www.debian.org)
 
@@ -26,7 +26,7 @@ Designed to run with **zero heavy dependencies**, minimal memory footprint, and 
   - **Disk**: Total, free, used bytes & disk usage % (`syscall.Statfs`).
   - **Uptime**: System uptime in seconds (`/proc/uptime`).
   - **Network**: Aggregate Rx/Tx byte throughput (`/proc/net/dev`).
-- ⚡ **Lightweight & Fast**: Single binary deploy, ~5MB footprint, written in clean Go standard library.
+- ⚡ **Lightweight & Fast**: Written in Python using FastAPI for high performance.
 - 🌐 **Web Ready**: Built-in CORS headers for `helm-web` frontend integration.
 - 🛡️ **Robust**: Structured `slog` logging and graceful `SIGINT`/`SIGTERM` server shutdown.
 
@@ -34,39 +34,26 @@ Designed to run with **zero heavy dependencies**, minimal memory footprint, and 
 
 ## 🚀 Quick Start on Debian
 
-### 1. Download Pre-compiled Binary
-
-Run this directly on your Debian box (no Go required):
+### 1. Setup Environment
 
 ```bash
-# Download snapshot binary for x86_64
-curl -L -o helm-core https://github.com/nayiswftw/Helm/releases/download/snapshot/helm-core-linux-amd64
+# Install Python & Git
+sudo apt update && sudo apt install -y python3 python3-pip python3-venv git
 
-# Make executable & run
-chmod +x helm-core
-./helm-core
-```
-
-> **ARM64 (Raspberry Pi / ARM NAS)**: Replace `amd64` with `arm64` in the URL above.
-
----
-
-### 2. Build from Source
-
-```bash
-# Install Go & Git
-sudo apt update && sudo apt install -y golang git
-
-# Clone & Build
+# Clone & Setup
 git clone https://github.com/nayiswftw/Helm.git
 cd Helm/helm-core
-go build -o helm ./cmd/helm
+
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
 
 # Run
-./helm
+python main.py
 ```
-
----
 
 ## ⚙️ Configuration
 
@@ -181,7 +168,8 @@ To run Helm Core reliably in the background on Debian:
    [Service]
    Type=simple
    User=root
-   ExecStart=/usr/local/bin/helm-core
+   WorkingDirectory=/path/to/Helm/helm-core
+   ExecStart=/path/to/Helm/helm-core/venv/bin/python main.py
    Restart=always
    RestartSec=5s
    Environment=HELM_PORT=8080
