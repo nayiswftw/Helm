@@ -44,5 +44,9 @@ func (s *System) Network() NetworkInfo {
 		info.TxBytes += parseUint(fields[8])
 	}
 
+	if err := scanner.Err(); err != nil {
+		s.logger.Warn("error scanning /proc/net/dev", "error", err)
+	}
+
 	return info
 }

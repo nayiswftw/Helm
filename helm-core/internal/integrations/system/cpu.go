@@ -22,7 +22,6 @@ func (c cpuTimes) active() uint64 {
 	return c.user + c.nice + c.system + c.irq + c.softirq + c.steal
 }
 
-// CPU samples CPU utilization percentage across a 100ms interval.
 func (s *System) CPU() CPUInfo {
 	info := CPUInfo{NumCores: runtime.NumCPU()}
 
@@ -76,6 +75,10 @@ func readCPUTimes() (cpuTimes, error) {
 				steal:   parseUint(fields[8]),
 			}, nil
 		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return cpuTimes{}, err
 	}
 
 	return cpuTimes{}, fmt.Errorf("/proc/stat cpu line not found")

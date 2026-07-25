@@ -41,6 +41,10 @@ func readProcMeminfo() (MemoryInfo, error) {
 		}
 	}
 
+	if err := scanner.Err(); err != nil {
+		return MemoryInfo{}, err
+	}
+
 	if info.Total > 0 {
 		if info.Available <= info.Total {
 			info.Used = info.Total - info.Available

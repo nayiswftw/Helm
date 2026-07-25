@@ -12,9 +12,14 @@ type Config struct {
 }
 
 func Load() (*Config, error) {
+	hostname, err := os.Hostname()
+	if err != nil || hostname == "" {
+		hostname = "helm"
+	}
+
 	cfg := &Config{
 		Port: 8080,
-		Name: "Helm",
+		Name: hostname,
 	}
 
 	if v := os.Getenv("HELM_PORT"); v != "" {
