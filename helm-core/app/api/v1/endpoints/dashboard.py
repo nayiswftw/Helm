@@ -1,8 +1,9 @@
 # pyrefly: ignore [missing-import]
 from fastapi import APIRouter
+
 from app.schemas.models import Dashboard
-from app.services.system import SystemService
 from app.services.devices import device_service
+from app.services.system import SystemService
 
 router = APIRouter()
 

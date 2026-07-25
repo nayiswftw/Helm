@@ -1,4 +1,5 @@
 from typing import List, Optional
+
 from app.schemas.models import Device
 from app.services.system import SystemService
 

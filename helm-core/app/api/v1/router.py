@@ -1,6 +1,7 @@
 # pyrefly: ignore [missing-import]
 from fastapi import APIRouter
-from app.api.v1.endpoints import health, dashboard, devices
+
+from app.api.v1.endpoints import dashboard, devices, health
 
 api_router = APIRouter()
 

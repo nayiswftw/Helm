@@ -2,6 +2,7 @@ from typing import List
 
 # pyrefly: ignore [missing-import]
 from fastapi import APIRouter, HTTPException
+
 from app.schemas.models import Device
 from app.services.devices import device_service
 

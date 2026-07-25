@@ -1,5 +1,6 @@
 import socket
 import time
+
 import psutil
 
 # Boot time recorded when module is loaded
