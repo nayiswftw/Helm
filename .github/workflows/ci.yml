@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: helm-core
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'helm-core/go.mod'
+          check-latest: true
+
+      - name: Run Go Vet
+        run: go vet ./...
+
+      - name: Run Go Test
+        run: go test -v ./...
+
+      - name: Build Helm Core
+        run: go build -v ./cmd/helm
