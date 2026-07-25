@@ -1,14 +1,15 @@
-name: CI
+name: CI & Snapshot Release
 
 on:
   push:
     branches: [ main, master ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main, master ]
 
 jobs:
   build:
-    name: Build & Test
+    name: Build, Test & Snapshot Release
     runs-on: ubuntu-latest
 
     defaults:
@@ -23,7 +24,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: 'helm-core/go.mod'
-          check-latest: true
+          cache-dependency-path: 'helm-core/go.sum'
 
       - name: Run Go Vet
         run: go vet ./...
@@ -31,5 +32,14 @@ jobs:
       - name: Run Go Test
         run: go test -v ./...
 
-      - name: Build Helm Core
-        run: go build -v ./cmd/helm
+      - name: Build Linux amd64 Binary
+        run: GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o dist/helm-core-linux-amd64 ./cmd/helm
+
+      - name: Build Linux arm64 Binary
+        run: GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o dist/helm-core-linux-arm64 ./cmd/helm
+
+      - name: Upload Snapshot Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: helm-core-snapshot-binaries
+          path: helm-core/dist/
