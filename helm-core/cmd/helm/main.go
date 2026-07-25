@@ -1,19 +1,48 @@
 package main
 
 import (
+	"context"
 	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"time"
 
-	"github.com/nayiswftw/helm/helm-core/internal/server"
+	"github.com/nayiswftw/helm/helm-core/internal/api"
+	"github.com/nayiswftw/helm/helm-core/internal/app"
+	"github.com/nayiswftw/helm/helm-core/internal/config"
 )
 
 func main() {
-	log.Println("Starting Helm Core...")
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("config load failed: %v", err)
+	}
 
-	srv := server.New()
+	app := app.New(cfg)
 
-	log.Println("Listening on :8080")
+	srv := &http.Server{
+		Addr:    cfg.Addr(),
+		Handler: api.Router(api.NewHandler(app)),
+	}
 
-	if err := srv.ListenAndServe(); err != nil {
-		log.Fatal(err)
+	go func() {
+		app.Logger.Info("server starting", "addr", srv.Addr)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("server failure: %v", err)
+		}
+	}()
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt)
+	<-stop
+
+	app.Logger.Info("server shutting down")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		app.Logger.Error("shutdown failed", "error", err)
 	}
 }
