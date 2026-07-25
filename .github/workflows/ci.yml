@@ -7,6 +7,9 @@ on:
   pull_request:
     branches: [ main, master ]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build, Test & Snapshot Release
@@ -38,8 +41,13 @@ jobs:
       - name: Build Linux arm64 Binary
         run: GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o dist/helm-core-linux-arm64 ./cmd/helm
 
-      - name: Upload Snapshot Artifacts
-        uses: actions/upload-artifact@v4
+      - name: Create or Update GitHub Snapshot Release
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: ncipollo/release-action@v1
         with:
-          name: helm-core-snapshot-binaries
-          path: helm-core/dist/
+          allowUpdates: true
+          artifacts: "helm-core/dist/*"
+          body: "Automated snapshot release of helm-core built from branch ${{ github.ref_name }}."
+          name: "Snapshot Release"
+          tag: "snapshot"
+          prerelease: true
