@@ -4,6 +4,7 @@ package service
 
 import (
 	"fmt"
+	"math"
 	"os"
 
 	"github.com/nayiswftw/helm/helm-core/internal/domain"
@@ -53,9 +54,15 @@ func (s *DashboardService) GetMetrics() (domain.SystemMetrics, error) {
 
 	return domain.SystemMetrics{
 		Hostname: hostname,
-		CPU:      cpu,
-		Memory:   memory,
-		Disk:     disk,
+		CPU:      round1(cpu),
+		Memory:   round1(memory),
+		Disk:     round1(disk),
 		Uptime:   uptime,
 	}, nil
 }
+
+// round1 rounds a float to 1 decimal place.
+func round1(v float64) float64 {
+	return math.Round(v*10) / 10
+}
+
