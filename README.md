@@ -71,8 +71,12 @@ Or grab a pre-built binary from [**Releases**](https://github.com/nayiswftw/helm
 All responses are flat JSON — no wrappers. Designed for embedded clients.
 
 ```
-GET /health              → Liveness probe
-GET /api/v1/dashboard    → System metrics snapshot
+GET  /health                      → Liveness probe
+GET  /api/v1/dashboard            → System metrics snapshot
+GET  /api/v1/devices              → List all managed devices
+GET  /api/v1/devices/{id}         → Get specific device details
+GET  /api/v1/actions              → List available administrative actions
+POST /api/v1/actions/{id}/execute → Execute a predefined action
 ```
 
 <details>
@@ -224,9 +228,9 @@ make clean
 | Server health monitoring | ✅ Done |
 | Dashboard API | ✅ Done |
 | CI/CD & snapshot releases | ✅ Done |
-| Device management | 🔜 Next |
-| Action framework | 📋 Planned |
-| Docker integration | 📋 Planned |
+| Device management | ✅ Done |
+| Action framework | ✅ Done |
+| Docker integration | 🔜 Next |
 | Dokploy integration | 📋 Planned |
 | Authentication & TLS | 📋 Planned |
 | ESP32 remote client | 📋 Planned |

@@ -9,7 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Phase 2: Device Management (Milestone 9)**
+  - `DeviceService` with local device auto-registration and capability probing (`metrics`, `power_control`, `containers`)
+  - Expanded `Device` domain model (`Platform`, `Architecture`, `Status`)
+  - Endpoints: `GET /api/v1/devices` and `GET /api/v1/devices/{id}`
+- **Phase 2: Action Framework (Milestone 10)**
+  - `ActionService` with security-first predefined action registry
+  - System power management integration (`Reboot()`, `Shutdown()`) using hardcoded `/usr/bin/systemctl` calls
+  - `Action` and `ActionResult` domain models (with `dangerous` flag for ESP32 UI prompts)
+  - Endpoints: `GET /api/v1/actions` and `POST /api/v1/actions/{id}/execute` (returns `202 Accepted`)
 - Initial project scaffolding for `helm-core`
+
 - HTTP server with Chi router and graceful shutdown
 - Environment-based configuration (`HELM_PORT`, `HELM_LOG_LEVEL`)
 - Application dependency injection container

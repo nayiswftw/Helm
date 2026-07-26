@@ -16,5 +16,9 @@ const (
 type Device struct {
 	ID           string       `json:"id"`
 	Hostname     string       `json:"hostname"`
+	Platform     string       `json:"platform"`     // e.g. "linux"
+	Architecture string       `json:"architecture"` // e.g. "amd64"
 	Capabilities []Capability `json:"capabilities"`
+	Status       string       `json:"status"`       // "online"
 }
+

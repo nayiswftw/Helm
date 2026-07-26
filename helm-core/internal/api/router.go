@@ -25,7 +25,14 @@ func NewRouter(application *app.Application) chi.Router {
 	// Versioned API
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get("/dashboard", handleDashboard(application.Dashboard, application.Logger))
+
+		r.Get("/devices", handleListDevices(application.Devices))
+		r.Get("/devices/{id}", handleGetDevice(application.Devices))
+
+		r.Get("/actions", handleListActions(application.Actions))
+		r.Post("/actions/{id}/execute", handleExecuteAction(application.Actions))
 	})
 
 	return r
 }
+
