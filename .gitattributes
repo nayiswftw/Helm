@@ -1,2 +1,33 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Enforce LF line endings in the repository
+* text=auto eol=lf
+
+# Go source files
+*.go text eol=lf
+
+# Shell scripts
+*.sh text eol=lf
+
+# Makefiles
+Makefile text eol=lf
+
+# Configuration
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
+*.mod text eol=lf
+*.sum text eol=lf
+
+# Documentation
+*.md text eol=lf
+*.txt text eol=lf
+LICENSE text eol=lf
+
+# Git/GitHub
+.gitignore text eol=lf
+.gitattributes text eol=lf
+.editorconfig text eol=lf
+
+# Binary files
+*.exe binary
+*.out binary

@@ -1,11 +1,17 @@
 package api
 
-import "net/http"
+import (
+	"encoding/json"
+	"net/http"
+)
 
-// Health handles GET /api/v1/health.
-func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
-	JSON(w, http.StatusOK, map[string]string{
-		"status": "ok",
-		"name":   h.app.Config.Name,
-	})
+// handleHealth returns a simple liveness check response.
+// GET /health → {"status": "ok"}
+func handleHealth() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{
+			"status": "ok",
+		})
+	}
 }

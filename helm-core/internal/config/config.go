@@ -1,42 +1,28 @@
 package config
 
 import (
-	"fmt"
 	"os"
-	"strconv"
 )
 
+// Config holds the application configuration.
+// All values are sourced from environment variables with sensible defaults.
 type Config struct {
-	Port int
-	Name string
+	Port     string // HELM_PORT — address to listen on (default ":8080")
+	LogLevel string // HELM_LOG_LEVEL — slog level: debug, info, warn, error (default "info")
 }
 
-func Load() (*Config, error) {
-	hostname, err := os.Hostname()
-	if err != nil || hostname == "" {
-		hostname = "helm"
+// Load reads configuration from environment variables.
+// Missing variables fall back to defaults.
+func Load() Config {
+	return Config{
+		Port:     envOrDefault("HELM_PORT", ":8080"),
+		LogLevel: envOrDefault("HELM_LOG_LEVEL", "info"),
 	}
-
-	cfg := &Config{
-		Port: 8080,
-		Name: hostname,
-	}
-
-	if v := os.Getenv("HELM_PORT"); v != "" {
-		port, err := strconv.Atoi(v)
-		if err != nil {
-			return nil, fmt.Errorf("HELM_PORT invalid: %w", err)
-		}
-		cfg.Port = port
-	}
-
-	if v := os.Getenv("HELM_NAME"); v != "" {
-		cfg.Name = v
-	}
-
-	return cfg, nil
 }
 
-func (c *Config) Addr() string {
-	return fmt.Sprintf(":%d", c.Port)
+func envOrDefault(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
 }

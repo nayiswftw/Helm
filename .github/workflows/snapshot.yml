@@ -1,0 +1,95 @@
+name: Snapshot Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    name: Build Snapshot
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache-dependency-path: helm-core/go.sum
+
+      - name: Download dependencies
+        working-directory: helm-core
+        run: go mod download
+
+      - name: Get short SHA
+        id: sha
+        run: echo "short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Get timestamp
+        id: timestamp
+        run: echo "ts=$(date +%Y%m%d%H%M%S)" >> "$GITHUB_OUTPUT"
+
+      - name: Build linux/amd64
+        working-directory: helm-core
+        env:
+          GOOS: linux
+          GOARCH: amd64
+          CGO_ENABLED: "0"
+        run: |
+          go build -trimpath \
+            -ldflags "-s -w -X main.version=snapshot-${{ steps.sha.outputs.short }}" \
+            -o ../dist/helm-linux-amd64 \
+            ./cmd/helm/
+
+      - name: Build linux/arm64
+        working-directory: helm-core
+        env:
+          GOOS: linux
+          GOARCH: arm64
+          CGO_ENABLED: "0"
+        run: |
+          go build -trimpath \
+            -ldflags "-s -w -X main.version=snapshot-${{ steps.sha.outputs.short }}" \
+            -o ../dist/helm-linux-arm64 \
+            ./cmd/helm/
+
+      - name: Generate checksums
+        working-directory: dist
+        run: sha256sum helm-* > checksums.txt
+
+      - name: Delete existing snapshot release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release delete snapshot --yes --cleanup-tag || true
+
+      - name: Create snapshot release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create snapshot \
+            --title "Snapshot (${{ steps.sha.outputs.short }})" \
+            --notes "Automated snapshot build from \`main\` branch.
+
+          **Commit:** ${{ github.sha }}
+          **Built:** ${{ steps.timestamp.outputs.ts }}
+
+          > [!WARNING]
+          > Snapshot builds are not stable releases. Use for testing only.
+
+          ### Binaries
+
+          | File | Platform |
+          |------|----------|
+          | \`helm-linux-amd64\` | Linux x86_64 |
+          | \`helm-linux-arm64\` | Linux ARM64 |
+          " \
+            --prerelease \
+            dist/helm-* \
+            dist/checksums.txt

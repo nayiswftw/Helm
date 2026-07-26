@@ -1,36 +1,30 @@
+//go:build linux
+
 package api
 
 import (
-	"net/http"
-
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+
+	"github.com/nayiswftw/helm/helm-core/internal/app"
 )
 
-func cors(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
-}
-
-// Router constructs the HTTP router and registers API routes.
-func Router(h *Handler) *chi.Mux {
+// NewRouter creates and configures the Chi router with all routes.
+func NewRouter(application *app.Application) chi.Router {
 	r := chi.NewRouter()
-	r.Use(cors)
 
+	// Middleware stack
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Recoverer)
+	r.Use(requestLogger(application.Logger))
+
+	// Health check — outside versioned API
+	r.Get("/health", handleHealth())
+
+	// Versioned API
 	r.Route("/api/v1", func(r chi.Router) {
-		r.Get("/health", h.Health)
-		r.Get("/dashboard", h.Dashboard)
-		r.Get("/devices", h.ListDevices)
-		r.Get("/devices/{id}", h.GetDevice)
+		r.Get("/dashboard", handleDashboard(application.Dashboard, application.Logger))
 	})
 
 	return r
