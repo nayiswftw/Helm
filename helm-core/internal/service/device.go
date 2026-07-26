@@ -5,6 +5,7 @@ package service
 import (
 	"errors"
 	"os"
+	"os/exec"
 	"runtime"
 	"sync"
 
@@ -29,7 +30,13 @@ func NewDeviceService(sys *system.System) *DeviceService {
 
 	capabilities := []domain.Capability{
 		domain.CapabilityMetrics,
-		domain.CapabilityPowerControl,
+	}
+
+	// Probe if systemctl is available for power control
+	if _, err := exec.LookPath("systemctl"); err == nil {
+		capabilities = append(capabilities, domain.CapabilityPowerControl)
+	} else if _, err := os.Stat("/usr/bin/systemctl"); err == nil {
+		capabilities = append(capabilities, domain.CapabilityPowerControl)
 	}
 
 	// Probe if Docker socket is available

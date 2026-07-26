@@ -3,7 +3,6 @@
 package api
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -16,8 +15,7 @@ import (
 func handleListDevices(deviceSvc *service.DeviceService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		devices := deviceSvc.GetAll()
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(devices)
+		respondJSON(w, http.StatusOK, devices)
 	}
 }
 
@@ -27,43 +25,21 @@ func handleGetDevice(deviceSvc *service.DeviceService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
 		if id == "" {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(apiError{
-				Error: errorDetail{
-					Code:    "bad_request",
-					Message: "Device ID parameter is required",
-				},
-			})
+			respondError(w, http.StatusBadRequest, "bad_request", "Device ID parameter is required")
 			return
 		}
 
 		dev, err := deviceSvc.GetByID(id)
 		if err != nil {
 			if errors.Is(err, service.ErrDeviceNotFound) {
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusNotFound)
-				json.NewEncoder(w).Encode(apiError{
-					Error: errorDetail{
-						Code:    "device_not_found",
-						Message: "Device not found",
-					},
-				})
+				respondError(w, http.StatusNotFound, "device_not_found", "Device not found")
 				return
 			}
 
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(apiError{
-				Error: errorDetail{
-					Code:    "internal_error",
-					Message: "Failed to retrieve device",
-				},
-			})
+			respondError(w, http.StatusInternalServerError, "internal_error", "Failed to retrieve device")
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(dev)
+		respondJSON(w, http.StatusOK, dev)
 	}
 }
