@@ -30,7 +30,7 @@ func New(cfg config.Config, logger *slog.Logger) *Application {
 	dockerClient := docker.NewClient("")
 
 	dashboard := service.NewDashboardService(sys)
-	devices := service.NewDeviceService(sys)
+	devices := service.NewDeviceService(sys, dockerClient)
 	containers := service.NewContainerService(dockerClient)
 
 	// Local device ID matches local registered device ID
@@ -53,5 +53,3 @@ func New(cfg config.Config, logger *slog.Logger) *Application {
 		Containers: containers,
 	}
 }
-
-

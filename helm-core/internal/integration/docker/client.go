@@ -9,6 +9,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -78,7 +79,7 @@ func (c *Client) ListContainers(ctx context.Context) ([]domain.Container, error)
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
 		return nil, fmt.Errorf("docker API returned status %d: %s", resp.StatusCode, string(body))
 	}
 
@@ -115,21 +116,21 @@ func (c *Client) ListContainers(ctx context.Context) ([]domain.Container, error)
 
 // StartContainer issues POST /containers/{id}/start.
 func (c *Client) StartContainer(ctx context.Context, id string) error {
-	return c.postAction(ctx, fmt.Sprintf("http://docker/containers/%s/start", id))
+	return c.postAction(ctx, fmt.Sprintf("http://docker/containers/%s/start", url.PathEscape(id)))
 }
 
 // StopContainer issues POST /containers/{id}/stop.
 func (c *Client) StopContainer(ctx context.Context, id string) error {
-	return c.postAction(ctx, fmt.Sprintf("http://docker/containers/%s/stop", id))
+	return c.postAction(ctx, fmt.Sprintf("http://docker/containers/%s/stop", url.PathEscape(id)))
 }
 
 // RestartContainer issues POST /containers/{id}/restart.
 func (c *Client) RestartContainer(ctx context.Context, id string) error {
-	return c.postAction(ctx, fmt.Sprintf("http://docker/containers/%s/restart", id))
+	return c.postAction(ctx, fmt.Sprintf("http://docker/containers/%s/restart", url.PathEscape(id)))
 }
 
-func (c *Client) postAction(ctx context.Context, url string) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, nil)
+func (c *Client) postAction(ctx context.Context, reqURL string) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, reqURL, nil)
 	if err != nil {
 		return fmt.Errorf("creating container action request: %w", err)
 	}
@@ -141,7 +142,7 @@ func (c *Client) postAction(ctx context.Context, url string) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusNotModified {
-		body, _ := io.ReadAll(resp.Body)
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
 		return fmt.Errorf("docker action returned status %d: %s", resp.StatusCode, string(body))
 	}
 

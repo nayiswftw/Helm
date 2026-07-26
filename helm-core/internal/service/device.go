@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/nayiswftw/helm/helm-core/internal/domain"
+	"github.com/nayiswftw/helm/helm-core/internal/integration/docker"
 	"github.com/nayiswftw/helm/helm-core/internal/integration/system"
 )
 
@@ -22,7 +23,7 @@ type DeviceService struct {
 }
 
 // NewDeviceService initializes the service and auto-registers the local server.
-func NewDeviceService(sys *system.System) *DeviceService {
+func NewDeviceService(sys *system.System, dockerClient *docker.Client) *DeviceService {
 	hostname, err := os.Hostname()
 	if err != nil || hostname == "" {
 		hostname = "local-server"
@@ -39,8 +40,8 @@ func NewDeviceService(sys *system.System) *DeviceService {
 		capabilities = append(capabilities, domain.CapabilityPowerControl)
 	}
 
-	// Probe if Docker socket is available
-	if _, err := os.Stat("/var/run/docker.sock"); err == nil {
+	// Probe if Docker is available
+	if dockerClient != nil && dockerClient.IsAvailable() {
 		capabilities = append(capabilities, domain.CapabilityContainers)
 	}
 
