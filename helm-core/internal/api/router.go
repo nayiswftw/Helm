@@ -31,8 +31,14 @@ func NewRouter(application *app.Application) chi.Router {
 
 		r.Get("/actions", handleListActions(application.Actions))
 		r.Post("/actions/{id}/execute", handleExecuteAction(application.Actions))
+
+		r.Get("/containers", handleListContainers(application.Containers))
+		r.Post("/containers/{id}/start", handleStartContainer(application.Containers))
+		r.Post("/containers/{id}/stop", handleStopContainer(application.Containers))
+		r.Post("/containers/{id}/restart", handleRestartContainer(application.Containers))
 	})
 
 	return r
 }
+
 

@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Phase 3: Docker Integration (Milestone 11)**
+  - Zero-dependency `docker.Client` communicating directly with `/var/run/docker.sock` over Unix domain sockets using stdlib `net/http`
+  - `Container` domain model (`ID`, `Name`, `Image`, `State`, `Status`, `Created`)
+  - `ContainerService` with automatic availability detection
+  - Endpoints: `GET /api/v1/containers`, `POST /api/v1/containers/{id}/start`, `POST /api/v1/containers/{id}/stop`, `POST /api/v1/containers/{id}/restart`
 - **Phase 2: Device Management (Milestone 9)**
   - `DeviceService` with local device auto-registration and capability probing (`metrics`, `power_control`, `containers`)
   - Expanded `Device` domain model (`Platform`, `Architecture`, `Status`)

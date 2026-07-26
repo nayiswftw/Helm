@@ -77,6 +77,10 @@ GET  /api/v1/devices              → List all managed devices
 GET  /api/v1/devices/{id}         → Get specific device details
 GET  /api/v1/actions              → List available administrative actions
 POST /api/v1/actions/{id}/execute → Execute a predefined action
+GET  /api/v1/containers           → List Docker containers
+POST /api/v1/containers/{id}/start → Start a container
+POST /api/v1/containers/{id}/stop → Stop a container
+POST /api/v1/containers/{id}/restart → Restart a container
 ```
 
 <details>
@@ -230,8 +234,8 @@ make clean
 | CI/CD & snapshot releases | ✅ Done |
 | Device management | ✅ Done |
 | Action framework | ✅ Done |
-| Docker integration | 🔜 Next |
-| Dokploy integration | 📋 Planned |
+| Docker integration | ✅ Done |
+| Dokploy integration | 🔜 Next |
 | Authentication & TLS | 📋 Planned |
 | ESP32 remote client | 📋 Planned |
 | Notifications | 📋 Planned |
