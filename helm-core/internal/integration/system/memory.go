@@ -41,6 +41,10 @@ func (s *System) MemoryUsage() (float64, error) {
 		fields[key] = v
 	}
 
+	if err := scanner.Err(); err != nil {
+		return 0, fmt.Errorf("reading /proc/meminfo: %w", err)
+	}
+
 	total, ok := fields["MemTotal"]
 	if !ok || total == 0 {
 		return 0, fmt.Errorf("MemTotal not found in /proc/meminfo")

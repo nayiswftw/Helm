@@ -85,5 +85,10 @@ func readCPUStat() (idle, total uint64, err error) {
 		return idle, total, nil
 	}
 
+	if err := scanner.Err(); err != nil {
+		return 0, 0, fmt.Errorf("reading /proc/stat: %w", err)
+	}
+
 	return 0, 0, fmt.Errorf("cpu line not found in /proc/stat")
 }
+

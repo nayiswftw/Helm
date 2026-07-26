@@ -61,5 +61,9 @@ func (s *System) NetworkUsage() (domain.NetworkMetrics, error) {
 		metrics.BytesSent += txBytes
 	}
 
+	if err := scanner.Err(); err != nil {
+		return domain.NetworkMetrics{}, fmt.Errorf("reading /proc/net/dev: %w", err)
+	}
+
 	return metrics, nil
 }
