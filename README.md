@@ -72,15 +72,24 @@ All responses are flat JSON — no wrappers. Designed for embedded clients.
 
 ```
 GET  /health                      → Liveness probe
+GET  /api/v1/openapi.json         → OpenAPI 3.1 specification
 GET  /api/v1/dashboard            → System metrics snapshot
 GET  /api/v1/devices              → List all managed devices
 GET  /api/v1/devices/{id}         → Get specific device details
 GET  /api/v1/actions              → List available administrative actions
 POST /api/v1/actions/{id}/execute → Execute a predefined action
 GET  /api/v1/containers           → List Docker containers
+GET  /api/v1/containers/{id}/stats → Get live container CPU & memory usage
+GET  /api/v1/containers/{id}/logs  → Get recent container log lines
 POST /api/v1/containers/{id}/start → Start a container
 POST /api/v1/containers/{id}/stop → Stop a container
 POST /api/v1/containers/{id}/restart → Restart a container
+GET  /api/v1/dokploy/projects     → List Dokploy projects
+GET  /api/v1/dokploy/applications/{id} → Get Dokploy app details
+POST /api/v1/dokploy/applications/{id}/deploy → Deploy a Dokploy app
+POST /api/v1/dokploy/applications/{id}/redeploy → Redeploy a Dokploy app
+GET  /api/v1/dokploy/applications/{id}/deployments → List deployments
+POST /api/v1/notifications/test   → Send test webhook notification
 ```
 
 <details>
@@ -100,7 +109,9 @@ POST /api/v1/containers/{id}/restart → Restart a container
   "cpu": 12.3,
   "memory": 45.6,
   "disk": 61.2,
-  "uptime": 864000
+  "uptime": 864000,
+  "load_average": [0.15, 0.22, 0.18],
+  "temperature": 43.5
 }
 ```
 
@@ -124,6 +135,13 @@ POST /api/v1/containers/{id}/restart → Restart a container
 |:---------|:--------|:------------|
 | `HELM_PORT` | `:8080` | Listen address |
 | `HELM_LOG_LEVEL` | `info` | `debug` · `info` · `warn` · `error` |
+| `HELM_PROC_PATH` | `/proc` | Path to host `/proc` filesystem (use `/host/proc` inside Docker) |
+| `HELM_API_KEY` | *(empty)* | API key authentication token (dev mode if empty) |
+| `HELM_TLS_CERT` | *(empty)* | Path to TLS certificate file |
+| `HELM_TLS_KEY` | *(empty)* | Path to TLS private key file |
+| `HELM_DOKPLOY_URL` | *(empty)* | Dokploy instance base URL |
+| `HELM_DOKPLOY_API_KEY` | *(empty)* | Dokploy API key |
+| `HELM_NOTIFY_URL` | *(empty)* | Webhook URL for notifications |
 
 <br>
 
@@ -235,10 +253,10 @@ make clean
 | Device management | ✅ Done |
 | Action framework | ✅ Done |
 | Docker integration | ✅ Done |
-| Dokploy integration | 🔜 Next |
-| Authentication & TLS | 📋 Planned |
-| ESP32 remote client | 📋 Planned |
-| Notifications | 📋 Planned |
+| Dokploy integration | ✅ Done |
+| Authentication & TLS | ✅ Done |
+| Notifications | ✅ Done |
+| ESP32 remote client | 🔜 Next |
 | Web dashboard | 📋 Future |
 
 <br>
@@ -262,8 +280,8 @@ Helm is designed to be exposed to the public Internet.
 - No unrestricted shell access
 - No arbitrary command execution
 - Only predefined, validated actions
-- API authentication *(planned)*
-- TLS termination *(planned)*
+- API authentication via bearer token or API key header
+- Optional TLS termination
 - Role-based access control *(planned)*
 
 See [**SECURITY.md**](SECURITY.md) for vulnerability reporting.

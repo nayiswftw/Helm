@@ -17,14 +17,15 @@ var (
 
 // ActionService manages predefined action registry and execution.
 type ActionService struct {
-	system   *system.System
-	logger   *slog.Logger
-	actions  map[string]domain.Action
-	deviceID string
+	system        *system.System
+	logger        *slog.Logger
+	notifications *NotificationService
+	actions       map[string]domain.Action
+	deviceID      string
 }
 
 // NewActionService creates an ActionService initialized with safe system actions.
-func NewActionService(sys *system.System, localDeviceID string, logger *slog.Logger) *ActionService {
+func NewActionService(sys *system.System, localDeviceID string, logger *slog.Logger, notifications *NotificationService) *ActionService {
 	actions := map[string]domain.Action{
 		"reboot": {
 			ID:          "reboot",
@@ -43,10 +44,11 @@ func NewActionService(sys *system.System, localDeviceID string, logger *slog.Log
 	}
 
 	return &ActionService{
-		system:   sys,
-		logger:   logger,
-		actions:  actions,
-		deviceID: localDeviceID,
+		system:        sys,
+		logger:        logger,
+		notifications: notifications,
+		actions:       actions,
+		deviceID:      localDeviceID,
 	}
 }
 
@@ -76,6 +78,12 @@ func (s *ActionService) Execute(actionID string) (domain.ActionResult, error) {
 				s.logger.Error("reboot action failed", "error", err)
 			}
 		}()
+
+		s.notifications.Notify(domain.EventActionExecuted, "Reboot initiated on "+act.DeviceID, map[string]string{
+			"action_id": actionID,
+			"device_id": act.DeviceID,
+		})
+
 		return domain.ActionResult{
 			ActionID: actionID,
 			Status:   "accepted",
@@ -88,6 +96,12 @@ func (s *ActionService) Execute(actionID string) (domain.ActionResult, error) {
 				s.logger.Error("shutdown action failed", "error", err)
 			}
 		}()
+
+		s.notifications.Notify(domain.EventActionExecuted, "Shutdown initiated on "+act.DeviceID, map[string]string{
+			"action_id": actionID,
+			"device_id": act.DeviceID,
+		})
+
 		return domain.ActionResult{
 			ActionID: actionID,
 			Status:   "accepted",
@@ -98,3 +112,4 @@ func (s *ActionService) Execute(actionID string) (domain.ActionResult, error) {
 		return domain.ActionResult{}, fmt.Errorf("unhandled action execution: %s", actionID)
 	}
 }
+

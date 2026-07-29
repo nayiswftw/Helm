@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -13,9 +14,10 @@ import (
 // MemoryUsage returns the current memory usage as a percentage (0-100).
 // It reads /proc/meminfo and computes (Total - Available) / Total * 100.
 func (s *System) MemoryUsage() (float64, error) {
-	f, err := os.Open("/proc/meminfo")
+	meminfoPath := filepath.Join(s.ProcPath, "meminfo")
+	f, err := os.Open(meminfoPath)
 	if err != nil {
-		return 0, fmt.Errorf("opening /proc/meminfo: %w", err)
+		return 0, fmt.Errorf("opening %s: %w", meminfoPath, err)
 	}
 	defer f.Close()
 

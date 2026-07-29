@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  helm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nayiswftw/helm:latest
+    container_name: helm
+    restart: unless-stopped
+    network_mode: host # Allows monitoring host network and simplifies port binding
+    environment:
+      - HELM_PORT=:8080
+      - HELM_LOG_LEVEL=info
+      - HELM_PROC_PATH=/host/proc
+      # Optional features (uncomment to enable):
+      # - HELM_API_KEY=your-secure-api-key
+      # - HELM_TLS_CERT=/certs/cert.pem
+      # - HELM_TLS_KEY=/certs/key.pem
+      # - HELM_DOKPLOY_URL=http://localhost:3000
+      # - HELM_DOKPLOY_API_KEY=your-dokploy-key
+      # - HELM_NOTIFY_URL=https://discord.com/api/webhooks/...
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /proc:/host/proc:ro
+      - /sys:/sys:ro # Mount sysfs for CPU thermal sensor monitoring
+      # - ./certs:/certs:ro # Uncomment if using TLS

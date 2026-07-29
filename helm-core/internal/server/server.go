@@ -11,6 +11,8 @@ import (
 type Server struct {
 	httpServer *http.Server
 	logger     *slog.Logger
+	tlsCert    string
+	tlsKey     string
 }
 
 // New creates a new Server with production-appropriate timeouts.
@@ -27,9 +29,21 @@ func New(addr string, handler http.Handler, logger *slog.Logger) *Server {
 	}
 }
 
-// Start begins listening and serving HTTP requests.
+// SetTLS configures optional TLS certificate and key file paths.
+// If both are non-empty, the server will use ListenAndServeTLS.
+func (s *Server) SetTLS(certFile, keyFile string) {
+	s.tlsCert = certFile
+	s.tlsKey = keyFile
+}
+
+// Start begins listening and serving HTTP (or HTTPS) requests.
 // It blocks until the server stops.
 func (s *Server) Start() error {
+	if s.tlsCert != "" && s.tlsKey != "" {
+		s.logger.Info("server starting with TLS", "addr", s.httpServer.Addr)
+		return s.httpServer.ListenAndServeTLS(s.tlsCert, s.tlsKey)
+	}
+
 	s.logger.Info("server starting", "addr", s.httpServer.Addr)
 	return s.httpServer.ListenAndServe()
 }
@@ -39,3 +53,4 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	s.logger.Info("server shutting down")
 	return s.httpServer.Shutdown(ctx)
 }
+

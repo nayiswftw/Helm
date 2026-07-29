@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -15,14 +16,14 @@ import (
 // It takes two samples from /proc/stat separated by a short interval
 // to compute instantaneous usage.
 func (s *System) CPUUsage() (float64, error) {
-	idle1, total1, err := readCPUStat()
+	idle1, total1, err := s.readCPUStat()
 	if err != nil {
 		return 0, fmt.Errorf("reading initial cpu stat: %w", err)
 	}
 
 	time.Sleep(200 * time.Millisecond)
 
-	idle2, total2, err := readCPUStat()
+	idle2, total2, err := s.readCPUStat()
 	if err != nil {
 		return 0, fmt.Errorf("reading second cpu stat: %w", err)
 	}
@@ -38,12 +39,13 @@ func (s *System) CPUUsage() (float64, error) {
 	return usage, nil
 }
 
-// readCPUStat reads the aggregate CPU line from /proc/stat.
+// readCPUStat reads the aggregate CPU line from /proc/stat (or HELM_PROC_PATH/stat).
 // Returns idle ticks and total ticks.
-func readCPUStat() (idle, total uint64, err error) {
-	f, err := os.Open("/proc/stat")
+func (s *System) readCPUStat() (idle, total uint64, err error) {
+	statPath := filepath.Join(s.ProcPath, "stat")
+	f, err := os.Open(statPath)
 	if err != nil {
-		return 0, 0, fmt.Errorf("opening /proc/stat: %w", err)
+		return 0, 0, fmt.Errorf("opening %s: %w", statPath, err)
 	}
 	defer f.Close()
 

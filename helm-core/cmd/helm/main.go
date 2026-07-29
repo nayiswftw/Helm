@@ -30,6 +30,10 @@ func main() {
 	logger.Info("helm starting",
 		"port", cfg.Port,
 		"log_level", cfg.LogLevel,
+		"auth_enabled", cfg.APIKey != "",
+		"tls_enabled", cfg.TLSCert != "" && cfg.TLSKey != "",
+		"dokploy_enabled", cfg.DokployURL != "",
+		"notifications_enabled", cfg.NotifyURL != "",
 	)
 
 	// Build the application container.
@@ -40,6 +44,7 @@ func main() {
 
 	// Create and start the HTTP server.
 	srv := server.New(cfg.Port, router, logger)
+	srv.SetTLS(cfg.TLSCert, cfg.TLSKey)
 
 	// Run server in a goroutine so we can listen for shutdown signals.
 	go func() {

@@ -5,6 +5,7 @@ package system
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -13,9 +14,10 @@ import (
 // It reads /proc/uptime which contains two values:
 // the uptime of the system (seconds) and the idle time (seconds).
 func (s *System) Uptime() (int64, error) {
-	data, err := os.ReadFile("/proc/uptime")
+	uptimePath := filepath.Join(s.ProcPath, "uptime")
+	data, err := os.ReadFile(uptimePath)
 	if err != nil {
-		return 0, fmt.Errorf("reading /proc/uptime: %w", err)
+		return 0, fmt.Errorf("reading %s: %w", uptimePath, err)
 	}
 
 	fields := strings.Fields(string(data))

@@ -55,3 +55,19 @@ func (s *ContainerService) Restart(ctx context.Context, id string) error {
 	}
 	return s.dockerClient.RestartContainer(ctx, id)
 }
+
+// GetStats returns live CPU and Memory statistics for a container.
+func (s *ContainerService) GetStats(ctx context.Context, id string) (domain.ContainerStats, error) {
+	if !s.dockerClient.IsAvailable() {
+		return domain.ContainerStats{}, ErrDockerUnavailable
+	}
+	return s.dockerClient.GetContainerStats(ctx, id)
+}
+
+// GetLogs returns recent log lines for a container.
+func (s *ContainerService) GetLogs(ctx context.Context, id string, tail int) (domain.ContainerLogs, error) {
+	if !s.dockerClient.IsAvailable() {
+		return domain.ContainerLogs{}, ErrDockerUnavailable
+	}
+	return s.dockerClient.GetContainerLogs(ctx, id, tail)
+}
